@@ -1,0 +1,25 @@
+{
+  "name": "mulyam",
+  "version": "0.0.0",
+  "author": "Piyush Mahato",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts"
+  },
+  "license": "ISC",
+  "packageManager": "pnpm@10.10.0",
+  "dependencies": {
+    "dayjs": "^1.11.19",
+    "papaparse": "^5.5.3",
+    "pdf-parse": "^2.4.5",
+    "pdfjs-dist": "^5.4.624",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/papaparse": "^5.5.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
