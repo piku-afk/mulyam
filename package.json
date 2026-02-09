@@ -2,15 +2,19 @@
   "name": "mulyam",
   "version": "0.0.0",
   "author": "Piyush Mahato",
-  "description": "",
+  "description": "Mulyam is a web app to track your net worth across all your investments",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "watch": "tsx watch src/pdfjs.ts",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "license": "ISC",
   "packageManager": "pnpm@10.10.0",
   "dependencies": {
+    "@fontsource-variable/noto-sans": "^5.2.10",
     "dayjs": "^1.11.19",
     "papaparse": "^5.5.3",
     "pdf-parse": "^2.4.5",
@@ -20,6 +24,7 @@
   "devDependencies": {
     "@types/papaparse": "^5.5.2",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
   }
 }

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.icon" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mulyam</title>
+    <meta
+      name="description"
+      content="Mulyam is a web app to track your net worth across all your investments"
+    />
+    <style>
+      main {
+        font-family: sans-serif;
+        max-width: 768px;
+        margin-inline: auto;
+      }
+
+      table {
+        margin-top: 24px;
+        width: 100%;
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        border: 1px solid black;
+      }
+
+      .error {
+        color: crimson;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Welcome to Mulyam</h1>
+      <p>A web app to track your net worth across all your investments.</p>
+      <form>
+        <label for="file">Get started by uploading your CAS pdf file:</label>
+        <input id="file" type="file" accept="application/pdf" />
+      </form>
+      <table>
+        <thead>
+          <th>Folio Number</th>
+          <th>ISIN</th>
+          <th>Units</th>
+          <th>NAV</th>
+          <th>NAV Date</th>
+          <th>Cost Price</th>
+          <th>Market Price</th>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </main>
+
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+</html>

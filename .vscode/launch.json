@@ -9,9 +9,13 @@
       "runtimeExecutable": "tsx",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-
-      // Files to exclude from debugger (e.g. call stack)
       "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
+    },
+    {
+      "type": "chrome",
+      "name": "http://localhost:3000/",
+      "request": "launch",
+      "url": "http://localhost:3000/"
     }
   ]
 }

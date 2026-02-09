@@ -1,4 +1,6 @@
-# Mulyam - know you worth
+# Mulyam
+
+Mulyam is a web app to track your net worth across all your investments. Below is the roadmap for the project:
 
 Phase 1: use the excel from groww app, manually upload to the app and view the insights.
 
