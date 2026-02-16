@@ -6,19 +6,20 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "watch": "tsx watch src/pdfjs.ts",
+    "watch": "tsx watch src/prototypes/unpdf.ts",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "license": "ISC",
-  "packageManager": "pnpm@10.10.0",
+  "packageManager": "pnpm@10.29.3",
   "dependencies": {
     "@fontsource-variable/noto-sans": "^5.2.10",
     "dayjs": "^1.11.19",
     "papaparse": "^5.5.3",
     "pdf-parse": "^2.4.5",
     "pdfjs-dist": "^5.4.624",
+    "unpdf": "^1.4.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

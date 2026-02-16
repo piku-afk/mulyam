@@ -11,5 +11,7 @@ ignoreWords:
   - noto
   - piyush
   - papaparse
+  - supabase
+  - unpdf
   - xirr
 import: []

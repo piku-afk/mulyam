@@ -1,5 +1,5 @@
 /**
- * This file is a prototype to parse the CAS pdf file downloaded from CAMS online.
+ * This file is a prototype to parse the groww Transaction and Holding Statement pdf file downloaded from email.
  * It reads the pdf file, extract the summary and holdings data. The extracted data is then logged to the console.
  *
  * The code uses the `pdfjs` library to read the pdf file and extract the text content. It then uses regular expressions to find the relevant lines in the text content and extract the required data.
@@ -11,38 +11,44 @@ import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
+
+dayjs.extend(customParseFormat);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 interface Holding {
-  folio: string;
   isin: string;
-  navDate: string;
-  nav: number;
+  rate: number;
   units: number;
-  costValue: number;
-  marketValue: number;
+  value: number;
 }
 
-const defaultHolding: Readonly<Holding> = {
-  folio: '',
+const defaultHolding: Holding = {
   isin: '',
-  navDate: '',
-  nav: 0,
+  rate: 0,
   units: 0,
-  costValue: 0,
-  marketValue: 0,
+  value: 0,
 };
 
-const folioRegex = /\b(?:[1-9]\d{7}|[1-9]\d{10,11})\b/g;
-const isinRegex = /INF[A-Z0-9]+/;
-const ignoredLines: RegExp[] = [/Version:(V\d+\.\d+)\s+(Live-\d+)/];
+const holdingHeadings = ['holdings balance'];
+const dateRegex = /\d{2}-\d{2}-\d{4}/;
+const isinRegex = /^IN[EF]\d[A-Z0-9]+/;
+const totalAmountRegex = /Total\s*([\d,]+\.?\d*)/;
+const differenceTolerance = 0.05;
+
+function isHoldingValid(holdings: Map<string, Holding>, totalAmount: number): boolean {
+  const holdingsTotal = +Array.from(holdings.values())
+    .reduce((result, holding) => result + holding.value, 0)
+    .toFixed(2);
+
+  return Math.abs(totalAmount - holdingsTotal) <= differenceTolerance;
+}
 
 async function main() {
-  const validPdfBuffer = await readFile(join(__dirname, '..', 'sample.pdf'));
-
+  const validPdfBuffer = await readFile(join(__dirname, '..', '..', 'sample.groww.pdf'));
   const pdf = await getDocument({
     data: new Uint8Array(validPdfBuffer),
     useSystemFonts: true,
@@ -111,49 +117,50 @@ async function main() {
     page.cleanup();
   }
 
-  const holdings = new Map<string, Holding>();
   const lines = pageContent.join('\n').split('\n');
+  const strippedLines = lines.slice(
+    lines.findIndex((line) =>
+      holdingHeadings.some((heading) => new RegExp(heading, 'i').test(line)),
+    ),
+  );
+
+  const holdings = new Map<string, Holding>();
+  let holdingDate: string = '';
+  let totalAmount = 0;
   let currentHolding: Holding = { ...defaultHolding };
 
-  for (const line of lines) {
+  for (const line of strippedLines) {
     const trimmed = line.trim();
-
-    if (ignoredLines.some((pattern) => pattern.test(trimmed))) {
-      continue;
-    }
-
-    const folioMatch = trimmed.match(folioRegex);
     const isinMatch = trimmed.match(isinRegex);
+    const holdingDateMatch = trimmed.match(dateRegex);
+    const totalAmountMatch = trimmed.match(totalAmountRegex);
 
-    if (folioMatch) {
-      const schemeParts = trimmed.split(' ');
-
-      if (schemeParts.length >= 2) {
-        const [folioNumber] = schemeParts[0].split('/');
-        const decimalValue = Number(schemeParts[1].replace(/,/g, '').match(/\d+(\.\d{2})?/)?.[0]);
-
-        if (!folioMatch || !decimalValue) continue;
-
-        currentHolding.folio = folioNumber.trim();
-        currentHolding.marketValue = decimalValue;
-      }
-    } else if (isinMatch) {
-      const schemeParts = trimmed.split(' ').map((part) => part.trim());
-
-      currentHolding.units = +schemeParts[0].replace(/,/g, '');
-      currentHolding.navDate = dayjs(schemeParts[1]).format('YYYY-MM-DD');
-      currentHolding.nav = +schemeParts[2].replace(/,/g, '');
-      currentHolding.isin = isinMatch[0];
-      currentHolding.costValue = +schemeParts[4].replace(/,/g, '');
+    if (holdingDateMatch) {
+      holdingDate = dayjs(holdingDateMatch[0], 'DD-MM-YYYY').format('YYYY-MM-DD');
     }
 
-    if (currentHolding.isin && currentHolding.marketValue) {
-      holdings.set(currentHolding.isin, currentHolding);
+    if (totalAmountMatch) {
+      totalAmount = +totalAmountMatch[1].replace(',', '');
+    }
+
+    currentHolding.isin = isinMatch?.[0] ?? currentHolding.isin;
+    const schemeParts = trimmed.split(' ');
+    currentHolding.units = +(schemeParts.find((item) => Number.isFinite(+item)) ?? 0);
+    currentHolding.rate = +schemeParts[schemeParts.length - 2] || 0;
+    currentHolding.value = +schemeParts[schemeParts.length - 1] || 0;
+
+    if (
+      currentHolding.isin &&
+      currentHolding.rate &&
+      currentHolding.units &&
+      currentHolding.value
+    ) {
+      holdings.set(currentHolding.isin, { ...defaultHolding, ...currentHolding });
       currentHolding = { ...defaultHolding };
     }
   }
 
-  console.log(Array.from(holdings.values()));
+  console.log('Holdings are valid for', holdingDate, isHoldingValid(holdings, totalAmount));
 }
 
 main();
